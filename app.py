@@ -1,212 +1,107 @@
-import streamlit as st
-import numpy as np
-import pandas as pd
-import time
-import random
-
-# 1. 페이지 기본 설정
-st.set_page_config(
-    page_title="미네르바 로또 6/45 마스터 V5.5", 
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
-# 2. 로또 6/45 프리미엄 테마 CSS (딥 네이비 & 골드)
-st.markdown("""
-    <style>
-    .stApp {
-        background-color: #0f172a;
-        /* 직관적이고 화려한 프리미엄 골드/카지노 볼 느낌의 배경 */
-        background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)), url("https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?q=80&w=1600&auto=format&fit=crop");
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
-    }
-    .block-container {
-        background-color: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        padding: 1.5rem;
-        border-radius: 20px;
-        margin-top: 1rem;
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); /* 황금빛 글로우 효과 */
-        border: 1px solid rgba(255, 215, 0, 0.2);
-    }
-    /* 로또 공 디자인 최적화 */
-    .lotto-ball {
-        display: inline-block;
-        width: 48px;
-        height: 48px;
-        line-height: 48px;
-        text-align: center;
-        border-radius: 50%;
-        color: #fff;
-        font-weight: 900;
-        font-size: 1.25rem;
-        margin: 4px;
-        box-shadow: inset -4px -4px 8px rgba(0,0,0,0.4), 2px 4px 6px rgba(0,0,0,0.5);
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-    @keyframes pop-in {
-        0% { transform: scale(0) translateY(-20px); opacity: 0; }
-        80% { transform: scale(1.15) translateY(5px); }
-        100% { transform: scale(1) translateY(0); opacity: 1; }
-    }
-    /* 슬롯머신 황금빛 텍스트 */
-    .slot-machine-text {
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 3.5rem;
-        font-weight: 900;
-        color: #FFD700; 
-        text-align: center;
-        background: rgba(0,0,0,0.8);
-        padding: 15px;
-        border-radius: 15px;
-        border: 3px solid #FFD700;
-        margin-bottom: 10px;
-        letter-spacing: 10px;
-        box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
-    }
-    h1, h2, h3 { color: #F8FAFC !important; text-align: center; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-    p, span, div { color: #E2E8F0; }
-    .master-alert {
-        background: linear-gradient(90deg, #b91c1c, #d32f2f);
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        color: white !important;
-        font-weight: bold;
-        text-align: center;
-        box-shadow: 0 4px 10px rgba(211, 47, 47, 0.4);
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-# 3. 레이아웃 컨테이너 사전 정의
-header_area = st.container()
-button_area = st.container()
-display_area = st.container()
-st.markdown("<br>", unsafe_allow_html=True)
-settings_area = st.container()
-
-# ==========================================
-# [하단부] 깔끔해진 가설 제어 패널 (모바일 최적화)
-# ==========================================
-with settings_area:
-    with st.expander("⚙️ 9대 퀀트 가설 제어 (Hyper-Core 최적값 세팅 완료)", expanded=False):
-        # 텍스트 간소화 및 직관적 배치
-        hypotheses = ["최근 5주 빈도", "장기 미출현", "동반 출현(짝꿍)", "홀짝 밸런싱", "공간 대칭 패턴", "구간 쏠림 분석", "10회차 갭", "수분포 매물대", "기초 체력"]
-        raw_weights = []
-        cols = st.columns(3)
-        
-        # 다니엘님의 황금 비율
-        def_vals = [55, 35, 65, 45, 25, 40, 60, 50, 55]
-        
-        for i, hyp in enumerate(hypotheses):
-            with cols[i % 3]:
-                w = st.slider(f"{i+1}. {hyp}", 0, 100, def_vals[i], key=f"v55_w_{i}")
-                raw_weights.append(w)
-                
-    # 조화 점수 95% 이상 강력 도출을 위한 하이퍼-코어 정밀 수식 보정
-    std_dev = np.std(raw_weights)
-    # 기존 0.7에서 0.4로 조정하여, 동일 가중치 대비 점수 상향 (95% 이상 표출)
-    harmony = max(0.0, min(99.9, 100.0 - (std_dev * 0.4)))
-
-# ==========================================
-# [상단부] 타이틀 및 버튼 배치
-# ==========================================
-with header_area:
-    st.title("🏆 행운의 6/45 프리미엄 분석기 (Hyper-Core)")
-    st.markdown("<div class='master-alert'>100회 초고속 스캐닝(15초)을 통해 가장 강력하게 압축된 1세트(5게임)가 표출됩니다.</div>", unsafe_allow_html=True)
-
-with button_area:
-    start_btn = st.button("🚀 LIVE 스캐닝 시작 (15초 소요)", use_container_width=True, type="primary")
-
-# 확률 보정 엔진 (무결점 셀프 리체크 반영)
-def get_stable_probs(weights):
-    total_w = sum(weights) if sum(weights) > 0 else 9
-    norm_w = [w/total_w for w in weights]
-    combined_prob = np.zeros(45)
-    for idx, w in enumerate(norm_w):
-        alpha = np.ones(45) * (0.2 + (idx * 0.05))
-        combined_prob += w * np.random.dirichlet(alpha)
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DANIEL COMMAND CENTER V16.8</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* 모바일 스크롤 멈춤(먹통) 원천 차단 */
+    body { background-color: #020202; color: #e2e8f0; font-family: sans-serif; overflow-x: hidden; touch-action: auto; }
+    /* 위젯이 터치를 가로채지 않도록 안정화 */
+    iframe { border: none; width: 100%; height: 100%; pointer-events: auto !important; }
+    .widget-box { background: #0a0a0a; border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; position: relative; z-index: 10; }
+    /* 버튼/링크 터치 우선순위 최상단으로 격상 */
+    .touch-target { position: relative; z-index: 50; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body class="p-3 md:p-6 pb-20">
+  <div class="max-w-[1200px] mx-auto space-y-5">
     
-    # 1.0 강제 보정 (이중 안전장치)
-    combined_prob = np.clip(combined_prob, 0, 1)
-    combined_prob /= np.sum(combined_prob)
-    return combined_prob
+    <!-- 1. 헤더 & 강제 업데이트 버튼 -->
+    <header class="flex flex-col gap-4 border-b border-slate-800 pb-5">
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/30">
+          <i data-lucide="globe" class="text-white w-6 h-6"></i>
+        </div>
+        <h1 class="text-2xl font-black text-white uppercase tracking-tighter">Daniel Terminal <span class="text-emerald-400 text-sm">V16.8</span></h1>
+      </div>
+      <button id="updateBtn" class="touch-target w-full bg-indigo-600 hover:bg-indigo-500 text-white py-5 rounded-xl font-black shadow-xl active:scale-95 flex items-center justify-center gap-2 transition-all text-lg">
+        <i data-lucide="refresh-cw" id="updateIcon"></i> 실시간 데이터 강제 업데이트
+      </button>
+    </header>
 
-# ==========================================
-# [중앙부] 라이브 시연 로직 (15초 쾌속)
-# ==========================================
-if start_btn:
-    with display_area:
-        slot_placeholder = st.empty()
-        status_text = st.empty()
-        progress_bar = st.progress(0)
-        
-        freq_data = np.zeros(45)
-        lotto_range = np.arange(1, 46)
-        np.random.seed(int(time.time()))
-        
-        # 100회 시뮬레이션: (100회 * 3번 * 0.05초 = 정확히 15초 소요)
-        for i in range(1, 101):
-            probs = get_stable_probs(raw_weights)
-            sample = np.random.choice(lotto_range, size=6, replace=False, p=probs)
-            for n in sample:
-                freq_data[n-1] += 1
-                
-            # 15초 쾌속 슬롯 연출
-            for _ in range(3):
-                fake_nums = sorted(random.sample(range(1, 46), 6))
-                slot_text = " ".join([f"{n:02d}" for n in fake_nums])
-                slot_placeholder.markdown(f"<div class='slot-machine-text'>{slot_text}</div>", unsafe_allow_html=True)
-                time.sleep(0.05) 
-                
-            status_text.markdown(f"<p style='text-align:center; font-weight:bold; color:#FFD700; font-size:1.1rem;'>미네르바 초고속 스캐닝: {i}% 완료</p>", unsafe_allow_html=True)
-            progress_bar.progress(i)
+    <!-- 2. 글로벌 티커 -->
+    <div class="h-14 widget-box">
+      <iframe src="https://s.tradingview.com/embed-widget/ticker-tape/?locale=kr&colorTheme=dark&isTransparent=true&displayMode=regular&showSymbolLogo=true&symbols=%5B%7B%22proName%22%3A%22NASDAQ%3AIXIC%22%2C%22title%22%3A%22나스닥%22%7D%2C%7B%22proName%22%3A%22SP%3ASPX%22%2C%22title%22%3A%22S%26P%20500%22%7D%2C%7B%22proName%22%3A%22KRX%3AKOSPI%22%2C%22title%22%3A%22KOSPI%22%7D%2C%7B%22proName%22%3A%22FX_IDC%3AUSDKRW%22%2C%22title%22%3A%22원%2F달러%22%7D%5D"></iframe>
+    </div>
 
-        slot_placeholder.empty()
-        progress_bar.empty()
-        status_text.markdown("<p style='text-align:center; font-size:1.5rem; font-weight:900; color:#4ade80;'>✅ 15초 스캐닝 완료! 최강의 조합이 완성되었습니다.</p>", unsafe_allow_html=True)
-        time.sleep(0.5)
-        status_text.empty()
+    <!-- 3. 한국 시장(KRX) 히트맵 -->
+    <div class="h-[550px] widget-box flex flex-col">
+      <div class="p-3 border-b border-slate-800 flex justify-between items-center bg-[#0d0d0d]">
+        <span class="text-sm font-black text-emerald-400 flex items-center gap-1"><i data-lucide="layout-grid" class="w-4 h-4"></i> 실시간 국내 증시 (KRX)</span>
+      </div>
+      <div class="flex-grow w-full relative">
+        <!-- 터치 스크롤 방해 방지를 위한 여백 래퍼 -->
+        <iframe id="krxMap" src="https://s.tradingview.com/embed-widget/stock-heatmap/?locale=kr&dataSource=KRX&colorTheme=dark&hasSymbolLogo=true&grouping=sector&market=all&symbolBy=market_cap&size=market_cap&color=change"></iframe>
+      </div>
+    </div>
 
-        # [초강력 확률 조합 (Hyper-Core)] 극단적 가중치 적용 (제곱수 4.0으로 대폭 상향)
-        # 1~2번 나온 노이즈 번호는 확률이 0에 가깝게 소거되고 코어 번호만 남습니다.
-        final_p = (freq_data + 0.05)**4.0 
-        
-        # [셀프 리체크] 부동소수점 오차로 인한 앱 다운 방지(무결점 정규화)
-        final_p = np.clip(final_p, 0, None)
-        final_p = final_p / np.sum(final_p)
+    <!-- 4. 나스닥 & 실시간 뉴스 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="h-[400px] widget-box">
+        <iframe src="https://s.tradingview.com/embed-widget/technical-analysis/?locale=kr&colorTheme=dark&symbol=NASDAQ%3AIXIC&interval=1h&isTransparent=true"></iframe>
+      </div>
+      <div class="h-[450px] widget-box">
+        <iframe src="https://s.tradingview.com/embed-widget/timeline/?locale=kr&colorTheme=dark&isTransparent=true&displayMode=regular"></iframe>
+      </div>
+    </div>
 
-        st.markdown(f"<h2 style='text-align:center; color:#FFD700;'>🎯 최적화 마스터 1세트 (조화 점수: {harmony:.1f}%)</h2><hr style='border-color: rgba(255,215,0,0.3);'>", unsafe_allow_html=True)
-        
-        # 5게임 라이브 리빌 연출
-        for i in range(5):
-            lucky_nums = sorted(np.random.choice(lotto_range, 6, replace=False, p=final_p))
-            
-            row_cols = st.columns([1, 8])
-            row_cols[0].markdown(f"<div style='font-size:1.5rem; font-weight:bold; color:#F8FAFC; line-height:60px;'>SET {chr(65+i)}</div>", unsafe_allow_html=True)
-            
-            ball_container = row_cols[1].empty()
-            html_string = "<div style='display: flex; gap: 8px; flex-wrap: wrap;'>"
-            
-            for n in lucky_nums:
-                # 6/45 공식 색상 매칭
-                color = "#fbc02d" if n <= 10 else "#1976d2" if n <= 20 else "#e53935" if n <= 30 else "#757575" if n <= 40 else "#43a047"
-                html_string += f'<span class="lotto-ball" style="background-color:{color};">{n}</span>'
-                ball_container.markdown(html_string + "</div>", unsafe_allow_html=True)
-                time.sleep(0.4) 
-                
-            time.sleep(0.3) 
-                
-        st.balloons()
-        st.markdown("<p style='text-align:center; font-size:1.2rem; margin-top:20px;'>🎉 다니엘님의 행운을 기원합니다!</p>", unsafe_allow_html=True)
+    <!-- 5. 4대 핵심 전략 외부 링크 (복구 및 터치 최적화) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-4">
+      <a href="https://whalewisdom.com/" target="_blank" class="touch-target p-5 bg-[#0c0c0c] border border-slate-700 hover:border-indigo-500 rounded-2xl flex flex-col items-center text-center shadow-lg active:scale-95 transition-all">
+        <i data-lucide="target" class="w-8 h-8 text-indigo-400 mb-2"></i>
+        <span class="font-black text-white uppercase text-sm">WhaleWisdom</span>
+        <span class="text-[10px] text-slate-400 mt-1">13F 기관 공시</span>
+      </a>
+      <a href="https://finance.naver.com/sise/" target="_blank" class="touch-target p-5 bg-[#0c0c0c] border border-slate-700 hover:border-emerald-500 rounded-2xl flex flex-col items-center text-center shadow-lg active:scale-95 transition-all">
+        <i data-lucide="bar-chart-3" class="w-8 h-8 text-emerald-400 mb-2"></i>
+        <span class="font-black text-white uppercase text-sm">Naver 증권</span>
+        <span class="text-[10px] text-slate-400 mt-1">국내 장중 수급</span>
+      </a>
+      <a href="https://edition.cnn.com/markets/fear-and-greed" target="_blank" class="touch-target p-5 bg-[#0c0c0c] border border-slate-700 hover:border-rose-500 rounded-2xl flex flex-col items-center text-center shadow-lg active:scale-95 transition-all">
+        <i data-lucide="zap" class="w-8 h-8 text-rose-400 mb-2"></i>
+        <span class="font-black text-white uppercase text-sm">Fear & Greed</span>
+        <span class="text-[10px] text-slate-400 mt-1">글로벌 심리 지표</span>
+      </a>
+      <a href="https://www.cmegroup.com/markets/interest-rates/target-rate-probabilities.html" target="_blank" class="touch-target p-5 bg-[#0c0c0c] border border-slate-700 hover:border-blue-500 rounded-2xl flex flex-col items-center text-center shadow-lg active:scale-95 transition-all">
+        <i data-lucide="shield-check" class="w-8 h-8 text-blue-400 mb-2"></i>
+        <span class="font-black text-white uppercase text-sm">CME FedWatch</span>
+        <span class="text-[10px] text-slate-400 mt-1">연준 금리 확률</span>
+      </a>
+    </div>
 
-        with st.expander("📊 생존 코어 번호 (상위 15개) 확인"):
-            chart_df = pd.DataFrame({
-                "번호": [f"N{i+1}" for i in range(45)],
-                "중복 생존 빈도": freq_data
-            }).sort_values("중복 생존 빈도", ascending=False).head(15)
-            st.bar_chart(chart_df, x="번호", y="중복 생존 빈도", color="#FFD700")
+  </div>
+
+  <script>
+    lucide.createIcons();
+    const btn = document.getElementById('updateBtn');
+    const icon = document.getElementById('updateIcon');
+    
+    // 버튼 터치 시 무조건 캐시 파괴 후 새 데이터 로딩
+    btn.addEventListener('click', () => {
+      icon.classList.add('animate-spin');
+      
+      document.querySelectorAll('iframe').forEach(f => {
+        const baseUrl = f.src.split('?')[0];
+        const params = new URLSearchParams(f.src.split('?')[1]);
+        params.set('cb', Date.now()); // 강력한 난수 캐시 버스팅
+        f.src = baseUrl + '?' + params.toString();
+      });
+      
+      setTimeout(() => icon.classList.remove('animate-spin'), 1000);
+    });
+  </script>
+</body>
+</html>
