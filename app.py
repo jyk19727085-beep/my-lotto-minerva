@@ -6,7 +6,7 @@ import random
 
 # 1. 페이지 기본 설정
 st.set_page_config(
-    page_title="미네르바 로또 6/45 마스터 V5.4", 
+    page_title="미네르바 로또 6/45 마스터 V5.5", 
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -93,7 +93,7 @@ settings_area = st.container()
 # [하단부] 깔끔해진 가설 제어 패널 (모바일 최적화)
 # ==========================================
 with settings_area:
-    with st.expander("⚙️ 9대 퀀트 가설 제어 (최적값 세팅 완료)", expanded=False):
+    with st.expander("⚙️ 9대 퀀트 가설 제어 (Hyper-Core 최적값 세팅 완료)", expanded=False):
         # 텍스트 간소화 및 직관적 배치
         hypotheses = ["최근 5주 빈도", "장기 미출현", "동반 출현(짝꿍)", "홀짝 밸런싱", "공간 대칭 패턴", "구간 쏠림 분석", "10회차 갭", "수분포 매물대", "기초 체력"]
         raw_weights = []
@@ -104,24 +104,25 @@ with settings_area:
         
         for i, hyp in enumerate(hypotheses):
             with cols[i % 3]:
-                w = st.slider(f"{i+1}. {hyp}", 0, 100, def_vals[i], key=f"v54_w_{i}")
+                w = st.slider(f"{i+1}. {hyp}", 0, 100, def_vals[i], key=f"v55_w_{i}")
                 raw_weights.append(w)
                 
-    # 조화 점수 90% 이상 도출을 위한 정밀 수식 보정
+    # 조화 점수 95% 이상 강력 도출을 위한 하이퍼-코어 정밀 수식 보정
     std_dev = np.std(raw_weights)
-    harmony = max(0.0, min(100.0, 100.0 - (std_dev * 0.7)))
+    # 기존 0.7에서 0.4로 조정하여, 동일 가중치 대비 점수 상향 (95% 이상 표출)
+    harmony = max(0.0, min(99.9, 100.0 - (std_dev * 0.4)))
 
 # ==========================================
 # [상단부] 타이틀 및 버튼 배치
 # ==========================================
 with header_area:
-    st.title("🏆 행운의 6/45 프리미엄 분석기")
-    st.markdown("<div class='master-alert'>100회 초고속 딥스캐닝을 통해 추출된 강력한 1세트(5게임)가 표출됩니다.</div>", unsafe_allow_html=True)
+    st.title("🏆 행운의 6/45 프리미엄 분석기 (Hyper-Core)")
+    st.markdown("<div class='master-alert'>100회 초고속 스캐닝(15초)을 통해 가장 강력하게 압축된 1세트(5게임)가 표출됩니다.</div>", unsafe_allow_html=True)
 
 with button_area:
     start_btn = st.button("🚀 LIVE 스캐닝 시작 (15초 소요)", use_container_width=True, type="primary")
 
-# 확률 보정 엔진
+# 확률 보정 엔진 (무결점 셀프 리체크 반영)
 def get_stable_probs(weights):
     total_w = sum(weights) if sum(weights) > 0 else 9
     norm_w = [w/total_w for w in weights]
@@ -129,11 +130,14 @@ def get_stable_probs(weights):
     for idx, w in enumerate(norm_w):
         alpha = np.ones(45) * (0.2 + (idx * 0.05))
         combined_prob += w * np.random.dirichlet(alpha)
-    combined_prob /= combined_prob.sum()
+    
+    # 1.0 강제 보정 (이중 안전장치)
+    combined_prob = np.clip(combined_prob, 0, 1)
+    combined_prob /= np.sum(combined_prob)
     return combined_prob
 
 # ==========================================
-# [중앙부] 라이브 시연 로직 (15초로 단축)
+# [중앙부] 라이브 시연 로직 (15초 쾌속)
 # ==========================================
 if start_btn:
     with display_area:
@@ -157,21 +161,24 @@ if start_btn:
                 fake_nums = sorted(random.sample(range(1, 46), 6))
                 slot_text = " ".join([f"{n:02d}" for n in fake_nums])
                 slot_placeholder.markdown(f"<div class='slot-machine-text'>{slot_text}</div>", unsafe_allow_html=True)
-                time.sleep(0.05) # 속도를 기존 대비 2배 향상
+                time.sleep(0.05) 
                 
             status_text.markdown(f"<p style='text-align:center; font-weight:bold; color:#FFD700; font-size:1.1rem;'>미네르바 초고속 스캐닝: {i}% 완료</p>", unsafe_allow_html=True)
             progress_bar.progress(i)
 
         slot_placeholder.empty()
         progress_bar.empty()
-        status_text.markdown("<p style='text-align:center; font-size:1.5rem; font-weight:900; color:#4ade80;'>✅ 스캐닝 완료! 최강의 조합이 완성되었습니다.</p>", unsafe_allow_html=True)
+        status_text.markdown("<p style='text-align:center; font-size:1.5rem; font-weight:900; color:#4ade80;'>✅ 15초 스캐닝 완료! 최강의 조합이 완성되었습니다.</p>", unsafe_allow_html=True)
         time.sleep(0.5)
         status_text.empty()
 
-        # [강력한 확률 조합] 극단적 가중치 적용 (제곱수 3.5로 상향)
-        # 어설픈 빈도수는 탈락시키고, 핵심 번호만 강력하게 살아남게 만듭니다.
-        final_p = (freq_data + 0.05)**3.5 
-        final_p /= final_p.sum()
+        # [초강력 확률 조합 (Hyper-Core)] 극단적 가중치 적용 (제곱수 4.0으로 대폭 상향)
+        # 1~2번 나온 노이즈 번호는 확률이 0에 가깝게 소거되고 코어 번호만 남습니다.
+        final_p = (freq_data + 0.05)**4.0 
+        
+        # [셀프 리체크] 부동소수점 오차로 인한 앱 다운 방지(무결점 정규화)
+        final_p = np.clip(final_p, 0, None)
+        final_p = final_p / np.sum(final_p)
 
         st.markdown(f"<h2 style='text-align:center; color:#FFD700;'>🎯 최적화 마스터 1세트 (조화 점수: {harmony:.1f}%)</h2><hr style='border-color: rgba(255,215,0,0.3);'>", unsafe_allow_html=True)
         
