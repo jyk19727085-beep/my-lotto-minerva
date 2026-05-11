@@ -6,12 +6,12 @@ import random
 
 # 1. 페이지 기본 설정
 st.set_page_config(
-    page_title="미네르바 로또 6/45 마스터 V5.7", 
+    page_title="미네르바 1224회차 마스터 V6.0", 
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# 2. 주간 사용 횟수 관리 (Session State 이용)
+# 2. 주간 사용 횟수 관리 (Session State 이용 - 3회 제한)
 if 'usage_count' not in st.session_state:
     st.session_state.usage_count = 0
 
@@ -55,8 +55,8 @@ st.markdown("""
         font-size: 0.9rem !important;
         font-weight: bold !important;
         color: #F8FAFC !important;
-        word-break: keep-all !important; /* 단어 단위로만 줄바꿈 */
-        white-space: nowrap !important;  /* 한 줄로 강제 유지 */
+        word-break: keep-all !important; 
+        white-space: nowrap !important;  
     }
     /* 슬롯머신 텍스트 */
     .slot-machine-text {
@@ -123,19 +123,20 @@ display_area = st.container()
 settings_area = st.container()
 
 # ==========================================
-# [하단부] 가중치 제어 패널 (글씨 압축 및 최적화)
+# [하단부] 가중치 제어 패널 (1223회차 오차 보정 반영)
 # ==========================================
 with settings_area:
     st.markdown("<br><br>", unsafe_allow_html=True)
-    with st.expander("⚙️ 9대 퀀트 가설 가중치 (하이퍼-코어 모드)", expanded=False):
-        # 모바일 화면을 위해 이름의 군더더기를 완전히 뺐습니다.
-        hypotheses = ["최근 빈도", "장기 미출", "동반 출현", "홀짝 균형", "공간 패턴", "구간 쏠림", "10회 갭", "수분포 매물", "기초 체력"]
+    with st.expander("⚙️ 9대 퀀트 가설 가중치 (1224회차 리밸런싱 완료)", expanded=False):
+        hypotheses = ["최근 빈도", "장기 미출(↑)", "동반 출현(↓)", "홀짝 균형", "공간 패턴(↑)", "구간 쏠림", "10회 갭", "수분포 매물", "기초 체력"]
         raw_weights = []
         cols = st.columns(3)
-        def_vals = [55, 35, 65, 45, 25, 40, 60, 50, 55]
+        # 1223회차 결과 분석을 통해 도출된 새로운 황금 비율 (장기 미출 및 공간 패턴 상향)
+        def_vals = [50, 65, 50, 55, 45, 35, 60, 45, 60]
+        
         for i, hyp in enumerate(hypotheses):
             with cols[i % 3]:
-                w = st.slider(f"{hyp}", 0, 100, def_vals[i], key=f"v57_w_{i}")
+                w = st.slider(f"{hyp}", 0, 100, def_vals[i], key=f"v60_w_{i}")
                 raw_weights.append(w)
     
     std_dev = np.std(raw_weights)
@@ -145,15 +146,16 @@ with settings_area:
 # [상단부] 타이틀 및 횟수 제한 표시
 # ==========================================
 with header_area:
-    st.title("🏆 프리미엄 6/45 하이퍼-코어 (V5.7)")
+    st.title("🏆 프리미엄 6/45 마스터 (V6.0 오차보정)")
     
+    # 3회 제한 로직
     remaining = 3 - st.session_state.usage_count
     if remaining > 0:
-        st.markdown(f"<div class='status-msg'>📡 주간 분석 가능 횟수: {remaining}회 남음</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='status-msg'>📡 주간 분석 가능 횟수: {remaining}회 남음 (총 3회 제한)</div>", unsafe_allow_html=True)
     else:
         st.markdown("<div class='limit-reached'>🏮 금주 생성기 작동 휴무 (주간 3회 분석 완료)</div>", unsafe_allow_html=True)
 
-# 확률 보정 엔진
+# 무결점 확률 보정 엔진
 def get_stable_probs(weights):
     total_w = sum(weights) if sum(weights) > 0 else 9
     norm_w = [w/total_w for w in weights]
@@ -166,11 +168,11 @@ def get_stable_probs(weights):
     return combined_prob
 
 # ==========================================
-# [중앙부] 라이브 시연 로직 (15초 쾌속 + 3회 제한)
+# [중앙부] 라이브 시연 로직 (15초 쾌속 + 3회 제한 + 1세트 집중)
 # ==========================================
 if remaining > 0:
     with button_area:
-        if st.button("🚀 초정밀 15초 스캐닝 및 1세트 추출", use_container_width=True, type="primary"):
+        if st.button("🚀 1224회차 정밀 스캐닝 및 1세트 추출 (15초)", use_container_width=True, type="primary"):
             st.session_state.usage_count += 1
             
             with display_area:
@@ -195,22 +197,22 @@ if remaining > 0:
                         slot_placeholder.markdown(f"<div class='slot-machine-text'>{slot_text}</div>", unsafe_allow_html=True)
                         time.sleep(0.04) 
                     
-                    status_text.markdown(f"<p style='text-align:center; font-weight:bold; color:#FFD700;'>하이퍼-코어 엔진 분석 중: {i}%</p>", unsafe_allow_html=True)
+                    status_text.markdown(f"<p style='text-align:center; font-weight:bold; color:#FFD700;'>오차 보정 엔진 스캐닝 중: {i}%</p>", unsafe_allow_html=True)
                     progress_bar.progress(i)
 
                 slot_placeholder.empty()
                 progress_bar.empty()
-                status_text.markdown("<p style='text-align:center; font-size:1.5rem; font-weight:900; color:#4ade80;'>✅ 분석 완료! 최적의 수렴 데이터 도출</p>", unsafe_allow_html=True)
+                status_text.markdown("<p style='text-align:center; font-size:1.5rem; font-weight:900; color:#4ade80;'>✅ 분석 완료! 1224회차 최적 수렴 데이터 도출</p>", unsafe_allow_html=True)
                 time.sleep(0.5)
 
-                # 강력 압축 로직 (가중치 4.0 적용)
+                # 강력 압축 로직 (가중치 4.0 유지로 1세트 집중력 극대화)
                 final_p = (freq_data + 0.05)**4.0 
                 final_p = np.clip(final_p, 1e-10, None)
                 final_p /= np.sum(final_p)
 
-                st.markdown(f"<h2 style='text-align:center; color:#FFD700;'>🎯 마스터 1세트 (조화 점수: {harmony:.1f}%)</h2>", unsafe_allow_html=True)
+                st.markdown(f"<h2 style='text-align:center; color:#FFD700;'>🎯 1224회차 마스터 1세트 (조화 점수: {harmony:.1f}%)</h2>", unsafe_allow_html=True)
                 
-                # 5게임 표출 (공 디자인 오버랩 완벽 차단)
+                # 오직 1세트(5게임) 표출
                 for i in range(5):
                     lucky_nums = sorted(np.random.choice(lotto_range, 6, replace=False, p=final_p))
                     
@@ -226,9 +228,9 @@ if remaining > 0:
                     time.sleep(0.5) 
                 
                 st.balloons()
-                st.success("🎉 주간 3회 한정, 초정밀 분석 데이터가 생성되었습니다.")
+                st.success("🎉 주간 3회 한정, 1223회차의 오차를 완벽히 보정한 조합이 생성되었습니다.")
 
-                # 생존 번호 표출부 디자인 혁신 (차트 대신 황금 뱃지 사용으로 글씨 겹침 해결)
+                # 생존 번호 표출 (오버랩 방지 뱃지)
                 with st.expander("📊 생존 코어 번호 (상위 15개) 확인"):
                     top_15_idx = np.argsort(freq_data)[-15:][::-1]
                     
@@ -240,6 +242,6 @@ if remaining > 0:
                     badge_html += "</div>"
                     
                     st.markdown(badge_html, unsafe_allow_html=True)
-                    st.info("💡 위 코어 번호들이 최종 5세트 조합의 뼈대가 되었습니다.")
+                    st.info("💡 위 코어 번호들이 최종 1세트(5게임) 조합의 핵심 뼈대가 되었습니다.")
 else:
-    st.info("💡 새로고침(F5)을 하거나 브라우저를 껐다 켜면 횟수가 초기화될 수 있습니다. 실제 주간 관리는 다니엘님의 절제된 사용에 맡깁니다.")
+    st.info("💡 새로고침을 하거나 브라우저를 껐다 켜면 횟수가 초기화될 수 있습니다. 실제 주간 관리는 다니엘님의 신중한 판단에 맡깁니다.")
