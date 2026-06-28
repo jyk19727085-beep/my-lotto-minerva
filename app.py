@@ -6,7 +6,7 @@ import random
 
 # 1. 페이지 기본 설정
 st.set_page_config(
-    page_title="최적의 미네르바 (V16.0 1230회차)", 
+    page_title="최적의 미네르바 (V17.0 1231회차)", 
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -123,26 +123,25 @@ display_area = st.container()
 settings_area = st.container()
 
 # ==========================================
-# [하단부] 11대 가중치 (1229회차 단번대 멸대 및 연번 분석을 통한 1230회차 최적화)
+# [하단부] 11대 가중치 (1230회차 10, 30번대 멸대 분석을 통한 1231회차 최적화)
 # ==========================================
 with settings_area:
     st.markdown("<br><br>", unsafe_allow_html=True)
-    with st.expander("⚙️ 11대 퀀트 가설 제어 (1230회차 최적화 리밸런싱 완료)", expanded=False):
+    with st.expander("⚙️ 11대 퀀트 가설 제어 (1231회차 허리 부활 타겟팅)", expanded=False):
         hypotheses = [
-            "최근 빈도 모멘텀", "장기 미출 회귀(단번대↑)", "동반/연번 출현(🔥최고)", 
-            "홀짝 완벽 균형", "용지 공간 패턴", "첫~끝 간격 및 쏠림 완화", 
+            "최근 빈도 모멘텀(↓)", "장기 미출 회귀(10,30번대↑)", "동반/연번 출현 유지", 
+            "홀짝 완벽 균형(↑)", "용지 공간 패턴 복구", "첫~끝 간격 및 중앙 쏠림(🔥)", 
             "10회차 미출 갭", "수분포 매물대", "기초 체력 및 배수", 
-            "순번(1P~6P) 유전", "미출 부활&반복(10~50)(↑)"
+            "순번(1P~6P) 유전", "미출 부활&반복(10~50)"
         ]
         raw_weights = []
         cols = st.columns(3)
-        # 1229회차 업데이트 데이터를 반영한 1230회차 황금 비율 
-        # (단번대 부활 및 연번 출현에 압도적 포커스)
-        def_vals = [55, 65, 75, 50, 55, 55, 50, 50, 45, 65, 70]
+        # 1230회차 극단적 변동성(10, 30번대 전멸)을 역이용한 1231회차 황금 비율
+        def_vals = [50, 65, 65, 60, 55, 70, 55, 50, 45, 65, 70]
         
         for i, hyp in enumerate(hypotheses):
             with cols[i % 3]:
-                w = st.slider(f"{hyp}", 0, 100, def_vals[i], key=f"final16_w_{i}")
+                w = st.slider(f"{hyp}", 0, 100, def_vals[i], key=f"final17_w_{i}")
                 raw_weights.append(w)
     
     std_dev = np.std(raw_weights)
@@ -152,7 +151,7 @@ with settings_area:
 # [상단부] 타이틀 및 횟수 제한 표시
 # ==========================================
 with header_area:
-    st.title("🏆 최적의 미네르바 (V16.0 1230회차 정조준)")
+    st.title("🏆 최적의 미네르바 (V17.0 1231회차 정조준)")
     
     remaining = 3 - st.session_state.usage_count
     if remaining > 0:
@@ -177,7 +176,7 @@ def get_stable_probs(weights):
 # ==========================================
 if remaining > 0:
     with button_area:
-        if st.button("🚀 1230회차 11대 가설 스캐닝 및 조합 추출 (15초)", use_container_width=True, type="primary"):
+        if st.button("🚀 1231회차 11대 가설 스캐닝 및 조합 추출 (15초)", use_container_width=True, type="primary"):
             st.session_state.usage_count += 1
             current_run = st.session_state.usage_count # 현재 구동 횟수 (1~3)
             
@@ -201,13 +200,13 @@ if remaining > 0:
                     slot_text = " ".join([f"{n:02d}" for n in fake_nums])
                     slot_placeholder.markdown(f"<div class='slot-machine-text'>{slot_text}</div>", unsafe_allow_html=True)
                     
-                    status_text.markdown(f"<p style='text-align:center; font-weight:bold; color:#FFD700; font-size:1.1rem;'>1229회차 단번대 멸대 및 연번 분석 스캐닝: {i}%</p>", unsafe_allow_html=True)
+                    status_text.markdown(f"<p style='text-align:center; font-weight:bold; color:#FFD700; font-size:1.1rem;'>1230회차 중앙 허리구간 멸대 오차 보정 중: {i}%</p>", unsafe_allow_html=True)
                     progress_bar.progress(i)
                     time.sleep(0.15) 
 
                 slot_placeholder.empty()
                 progress_bar.empty()
-                status_text.markdown("<p style='text-align:center; font-size:1.6rem; font-weight:900; color:#4ade80;'>✅ 15초 스캐닝 완료! 1230회차 최적 수렴 데이터 도출</p>", unsafe_allow_html=True)
+                status_text.markdown("<p style='text-align:center; font-size:1.6rem; font-weight:900; color:#4ade80;'>✅ 15초 스캐닝 완료! 1231회차 최적 수렴 데이터 도출</p>", unsafe_allow_html=True)
                 time.sleep(0.8)
 
                 # 강력 압축 로직 (첫 구동 시 압축률을 5.0으로 더 높여 코어 번호 밀집 유도)
@@ -216,7 +215,7 @@ if remaining > 0:
                 final_p = np.clip(final_p, 1e-10, None) 
                 final_p /= np.sum(final_p)
 
-                st.markdown(f"<h2 style='text-align:center; color:#FFD700;'>🎯 1230회차 마스터 1세트 (D_Harmony: {harmony:.1f}%)</h2>", unsafe_allow_html=True)
+                st.markdown(f"<h2 style='text-align:center; color:#FFD700;'>🎯 1231회차 마스터 1세트 (D_Harmony: {harmony:.1f}%)</h2>", unsafe_allow_html=True)
                 st.markdown("<hr style='border-color: rgba(255,215,0,0.3); margin-top:0;'>", unsafe_allow_html=True)
                 
                 # 5게임 표출
@@ -242,11 +241,11 @@ if remaining > 0:
                     time.sleep(0.6) 
                 
                 st.balloons()
-                msg = "🎉 1회차 구동 혜택: 가장 강력한 절대 빈도 예측번호가 첫 세트에 추출되었습니다!" if current_run == 1 else "🎉 최신 트렌드 가중치가 완벽히 융합된 조합이 생성되었습니다."
+                msg = "🎉 1회차 구동 혜택: 가장 강력한 절대 빈도 예측번호가 첫 세트에 추출되었습니다!" if current_run == 1 else "🎉 11대 트렌드 가중치가 완벽히 융합된 조합이 생성되었습니다."
                 st.markdown(f"<br><p style='text-align:center; font-size:1.2rem; color:#E2E8F0;'>{msg}</p>", unsafe_allow_html=True)
 
                 # 생존 번호 표출
-                with st.expander("📊 1230회차 생존 코어 번호 (상위 15개) 딥-스캔 결과 확인"):
+                with st.expander("📊 1231회차 생존 코어 번호 (상위 15개) 딥-스캔 결과 확인"):
                     top_15_idx = np.argsort(freq_data)[-15:][::-1]
                     
                     badge_html = "<div class='badge-container'>"
