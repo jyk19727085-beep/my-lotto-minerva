@@ -6,7 +6,7 @@ import random
 
 # 1. 페이지 기본 설정
 st.set_page_config(
-    page_title="최적의 미네르바 (V24.0 1235회차 쪽집게)", 
+    page_title="최적의 미네르바 (V25.0 1236회차 절대 반격)", 
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -123,26 +123,26 @@ display_area = st.container()
 settings_area = st.container()
 
 # ==========================================
-# [하단부] 11대 가중치 (1235회차 올-홀수 및 20번대 멸대 역발상 쪽집게 타겟팅)
+# [하단부] 11대 가중치 (1235회차 2주 연속 홀수 쏠림 및 허리 멸대 완벽 보정)
 # ==========================================
 with settings_area:
     st.markdown("<br><br>", unsafe_allow_html=True)
-    with st.expander("⚙️ 11대 퀀트 가설 제어 (1235회차 짝수 맹폭 및 20번대 집중 타겟팅)", expanded=False):
+    with st.expander("⚙️ 11대 퀀트 가설 제어 (1236회차 짝수 및 16~38번대 절대 반격)", expanded=False):
         hypotheses = [
-            "최근 빈도 모멘텀", "장기 미출 회귀(20번대 반등🔥)", "직전 인접수(마킹 대각선) 추종", 
-            "홀짝 균형(짝수의 맹폭격🔥)", "용지 공간 패턴 분산", "첫~끝 간격 및 중앙 쏠림", 
+            "최근 빈도 모멘텀(↓)", "장기 미출 회귀(20번대 및 허리 극대노 폭발🔥)", "직전 인접수 및 연번(지속↑)", 
+            "홀짝 균형(짝수의 한계 돌파 반격🔥)", "용지 공간 패턴(거대 공백 채우기↑)", "첫~끝 간격 및 중앙 쏠림", 
             "10회차 미출 갭", "수분포 매물대", "기초 체력 및 끝수", 
             "순번(1P~6P) 유전", "미출 부활&반복(10~50회)"
         ]
         raw_weights = []
         cols = st.columns(3)
-        # 1234회차 올-홀수 사태와 20번대 전멸을 완벽하게 역이용한 쪽집게 세팅
-        # 짝수 반격(90점 최고점), 20번대 회귀(85점), 미출 부활(75점) 극한 압축
-        def_vals = [50, 85, 80, 90, 60, 55, 55, 50, 45, 65, 75]
+        # 1235회차의 기형적 편차를 완벽히 역이용한 1236회차 응축 폭발 세팅
+        # 짝수 반격(90점 최고점), 거대 공백(16~38) 채우기(85점), 인접수/연번(80점)
+        def_vals = [40, 85, 80, 90, 85, 60, 55, 50, 45, 65, 75]
         
         for i, hyp in enumerate(hypotheses):
             with cols[i % 3]:
-                w = st.slider(f"{hyp}", 0, 100, def_vals[i], key=f"final24_w_{i}")
+                w = st.slider(f"{hyp}", 0, 100, def_vals[i], key=f"final25_w_{i}")
                 raw_weights.append(w)
     
     std_dev = np.std(raw_weights)
@@ -152,7 +152,7 @@ with settings_area:
 # [상단부] 타이틀 및 횟수 제한 표시
 # ==========================================
 with header_area:
-    st.title("🏆 최적의 미네르바 (V24.0 1235회차 쪽집게 마스터)")
+    st.title("🏆 최적의 미네르바 (V25.0 1236회차 절대 반격)")
     
     remaining = 3 - st.session_state.usage_count
     if remaining > 0:
@@ -179,7 +179,7 @@ def get_stable_probs(weights):
 # ==========================================
 if remaining > 0:
     with button_area:
-        if st.button("🚀 1235회차 쪽집게 11대 가설 스캐닝 및 추출 (15초)", use_container_width=True, type="primary"):
+        if st.button("🚀 1236회차 무결점 11대 가설 스캐닝 및 추출 (15초)", use_container_width=True, type="primary"):
             st.session_state.usage_count += 1
             current_run = st.session_state.usage_count 
             
@@ -203,13 +203,13 @@ if remaining > 0:
                     slot_text = " ".join([f"{n:02d}" for n in fake_nums])
                     slot_placeholder.markdown(f"<div class='slot-machine-text'>{slot_text}</div>", unsafe_allow_html=True)
                     
-                    status_text.markdown(f"<p style='text-align:center; font-weight:bold; color:#FFD700; font-size:1.1rem;'>짝수 반격장 및 20번대 집중 타겟 시뮬레이션 중: {i}%</p>", unsafe_allow_html=True)
+                    status_text.markdown(f"<p style='text-align:center; font-weight:bold; color:#FFD700; font-size:1.1rem;'>짝수 반격 및 거대 공백(16~38) 복원 시뮬레이션 중: {i}%</p>", unsafe_allow_html=True)
                     progress_bar.progress(i)
                     time.sleep(0.15) 
 
                 slot_placeholder.empty()
                 progress_bar.empty()
-                status_text.markdown("<p style='text-align:center; font-size:1.6rem; font-weight:900; color:#4ade80;'>✅ 15초 스캐닝 완료! 1235회차 쪽집게 데이터 도출</p>", unsafe_allow_html=True)
+                status_text.markdown("<p style='text-align:center; font-size:1.6rem; font-weight:900; color:#4ade80;'>✅ 15초 스캐닝 완료! 1236회차 최강 조합 도출</p>", unsafe_allow_html=True)
                 time.sleep(0.8)
 
                 # 강력 압축 로직 (첫 구동 시 압축률 5.5로 상향하여 뼈대 번호 극단적 밀집 유도)
@@ -218,7 +218,7 @@ if remaining > 0:
                 final_p = np.clip(final_p, 1e-10, None) 
                 final_p /= np.sum(final_p)
 
-                st.markdown(f"<h2 style='text-align:center; color:#FFD700;'>🎯 1235회차 마스터 1세트 (D_Harmony: {harmony:.1f}%)</h2>", unsafe_allow_html=True)
+                st.markdown(f"<h2 style='text-align:center; color:#FFD700;'>🎯 1236회차 마스터 1세트 (D_Harmony: {harmony:.1f}%)</h2>", unsafe_allow_html=True)
                 st.markdown("<hr style='border-color: rgba(255,215,0,0.3); margin-top:0;'>", unsafe_allow_html=True)
                 
                 # 5게임 표출
@@ -227,7 +227,7 @@ if remaining > 0:
                     if current_run == 1 and i == 0:
                         top_6_idx = np.argsort(freq_data)[-6:][::-1]
                         lucky_nums = sorted([int(idx) + 1 for idx in top_6_idx])
-                        set_label = f"SET {chr(65+i)} <span class='first-run-badge'>🌟(1회차 쪽집게 최우선 절대 빈도 추출)</span>"
+                        set_label = f"SET {chr(65+i)} <span class='first-run-badge'>🌟(1회차 짝수/허리 최우선 절대 빈도 추출)</span>"
                     else:
                         lucky_nums = sorted(np.random.choice(lotto_range, 6, replace=False, p=final_p))
                         set_label = f"SET {chr(65+i)}"
@@ -248,7 +248,7 @@ if remaining > 0:
                 st.markdown(f"<br><p style='text-align:center; font-size:1.2rem; color:#E2E8F0;'>{msg}</p>", unsafe_allow_html=True)
 
                 # 생존 번호 표출
-                with st.expander("📊 1235회차 생존 코어 번호 (상위 15개) 딥-스캔 결과 확인"):
+                with st.expander("📊 1236회차 생존 코어 번호 (상위 15개) 딥-스캔 결과 확인"):
                     top_15_idx = np.argsort(freq_data)[-15:][::-1]
                     
                     badge_html = "<div class='badge-container'>"
